@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mom's Art Gallery</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playwrite+Magyarorsz%C3%A1g:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="info-panel">
+        <h2 id="painting-title"></h2>
+        <p id="painting-description"></p>
+        <button id="close-panel-btn">Close</button>
+    </div>
+    <img id="popup-painting-image" src="" alt="Painting" style="display:none; max-width: 80%; max-height: 80vh; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1001; border: 5px solid white; box-shadow: 0 0 15px rgba(0,0,0,0.5);"/>
+
+    <div id="blocker">
+        <div id="instructions">
+            <span style="font-size:36px">Click to play</span>
+            <br />
+            (W, A, S, D = Move, MOUSE = Look around)
+        </div>
+    </div>
+
+    <script src="js/three.min.js"></script>
+    <!-- If using PointerLockControls from older examples, it might need to be adapted or use the module version -->
+    <script src="js/PointerLockControls.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
