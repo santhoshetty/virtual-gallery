@@ -1,8 +1,18 @@
 {
+  "name": "virtual-gallery",
+  "version": "1.0.0",
+  "description": "Mom's Virtual Art Gallery - A 3D gallery experience built with Three.js",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "three": "^0.176.0"
   },
   "devDependencies": {
     "vite": "^6.3.5"
-  }
+  },
+  "type": "module"
 }
