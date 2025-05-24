@@ -56,6 +56,53 @@
         <div id="pos-z">Z: 0</div>
     </div>
 
+    <!-- Popup image for full-screen painting view -->
+    <div id="popup-painting-container" style="
+        display: none; 
+        position: fixed; 
+        top: 50%; 
+        left: 50%; 
+        transform: translate(-50%, -50%); 
+        z-index: 1001;
+        max-width: 90vw;
+        max-height: 90vh;
+    ">
+        <img id="popup-painting-image" src="" alt="Painting" style="
+            max-width: 100%; 
+            max-height: 80vh; 
+            border: 5px solid white; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            border-radius: 5px;
+            display: block;
+        "/>
+        <button id="popup-close-btn" style="
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #333;
+            color: #333;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 1002;
+        ">×</button>
+    </div>
+
+    <!-- Info panel for paintings -->
+    <div id="info-panel" style="display: none;">
+        <h2 id="painting-title"></h2>
+        <p id="painting-description"></p>
+        <button id="close-panel-btn">Close</button>
+    </div>
+
     <!-- Scripts -->
     <script src="js/three.min.js"></script>
     <script src="js/PointerLockControls.js"></script>

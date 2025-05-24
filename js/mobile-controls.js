@@ -445,6 +445,7 @@ class MobileControls {
         const infoPanel = document.getElementById('info-panel');
         const titleEl = document.getElementById('painting-title');
         const descriptionEl = document.getElementById('painting-description');
+        const popupContainer = document.getElementById('popup-painting-container');
         const popupImage = document.getElementById('popup-painting-image');
         
         // Track the active painting and panel state
@@ -459,8 +460,8 @@ class MobileControls {
         // Auto-show full image after a delay
         setTimeout(() => {
             if (infoPanel && infoPanel.style.display === 'block') {
-                if (popupImage) {
-                    popupImage.style.display = 'block';
+                if (popupContainer) {
+                    popupContainer.style.display = 'block';
                     this.imagePopupOpen = true;
                 }
                 if (infoPanel) {
@@ -513,12 +514,14 @@ class MobileControls {
 
     setupMobileInfoPanelControls() {
         const closePanelBtn = document.getElementById('close-panel-btn');
+        const popupContainer = document.getElementById('popup-painting-container');
         const popupImage = document.getElementById('popup-painting-image');
+        const popupCloseBtn = document.getElementById('popup-close-btn');
         
         const closeInfoAndPopup = () => {
             const infoPanel = document.getElementById('info-panel');
             if (infoPanel) infoPanel.style.display = 'none';
-            if (popupImage) popupImage.style.display = 'none';
+            if (popupContainer) popupContainer.style.display = 'none';
             
             // Reset tracking variables
             this.activePainting = null;
@@ -526,11 +529,26 @@ class MobileControls {
             this.imagePopupOpen = false;
         };
         
+        // Close panel button
         if (closePanelBtn) {
             closePanelBtn.onclick = closeInfoAndPopup;
         }
+        
+        // Close on image click (keep this for backward compatibility)
         if (popupImage) {
             popupImage.onclick = closeInfoAndPopup;
+        }
+        
+        // Close button (new X button)
+        if (popupCloseBtn) {
+            popupCloseBtn.onclick = closeInfoAndPopup;
+            
+            // Add touch event for mobile
+            popupCloseBtn.addEventListener('touchstart', (e) => {
+                closeInfoAndPopup();
+                e.preventDefault();
+                e.stopPropagation();
+            });
         }
     }
 
@@ -549,10 +567,10 @@ class MobileControls {
             console.log(`Moving away from painting (distance: ${distance.toFixed(2)}), closing info panels`);
             
             const infoPanel = document.getElementById('info-panel');
-            const popupImage = document.getElementById('popup-painting-image');
+            const popupContainer = document.getElementById('popup-painting-container');
             
             if (infoPanel) infoPanel.style.display = 'none';
-            if (popupImage) popupImage.style.display = 'none';
+            if (popupContainer) popupContainer.style.display = 'none';
             
             // Reset tracking variables
             this.activePainting = null;
