@@ -132,14 +132,36 @@ class MobileControls {
 
     setupTouchControls() {
         let lastTouchX = 0, lastTouchY = 0, isRotating = false;
+        let touchStartTime = 0, touchStartX = 0, touchStartY = 0;
         const euler = new THREE.Euler(0, 0, 0, 'YXZ');
         const PI_2 = Math.PI / 2;
         
+        // Unified touch handler - handles UI, painting detection, and camera rotation
         document.addEventListener('touchstart', (event) => {
             if (event.touches.length === 1) {
+                const touch = event.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                touchStartTime = Date.now();
+                
+                // Check if touch is on UI elements - let them handle it
+                const touchedElement = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (touchedElement) {
+                    const isUIElement = touchedElement.closest('#mobile-controls') || 
+                                      touchedElement.closest('#info-panel') || 
+                                      touchedElement.closest('#popup-painting-container');
+                    
+                    if (isUIElement) {
+                        console.log('Touch on UI element, letting UI handle it');
+                        return; // Let UI elements handle their own events
+                    }
+                }
+                
+                // Not on UI, prepare for camera rotation or painting detection
                 isRotating = true;
-                lastTouchX = event.touches[0].pageX;
-                lastTouchY = event.touches[0].pageY;
+                lastTouchX = touch.pageX;
+                lastTouchY = touch.pageY;
+                console.log('Touch start - preparing for camera or painting interaction');
             }
             event.preventDefault();
         }, { passive: false });
@@ -150,11 +172,15 @@ class MobileControls {
                 const movementX = touch.pageX - lastTouchX;
                 const movementY = touch.pageY - lastTouchY;
                 
-                euler.setFromQuaternion(this.camera.quaternion);
-                euler.y -= movementX * this.touchControls.rotationSpeed;
-                euler.x -= movementY * this.touchControls.rotationSpeed;
-                euler.x = Math.max(-PI_2, Math.min(PI_2, euler.x));
-                this.camera.quaternion.setFromEuler(euler);
+                // Only do camera rotation if we've moved enough
+                const totalMovement = Math.abs(movementX) + Math.abs(movementY);
+                if (totalMovement > 5) {
+                    euler.setFromQuaternion(this.camera.quaternion);
+                    euler.y -= movementX * this.touchControls.rotationSpeed;
+                    euler.x -= movementY * this.touchControls.rotationSpeed;
+                    euler.x = Math.max(-PI_2, Math.min(PI_2, euler.x));
+                    this.camera.quaternion.setFromEuler(euler);
+                }
                 
                 lastTouchX = touch.pageX;
                 lastTouchY = touch.pageY;
@@ -163,14 +189,32 @@ class MobileControls {
         }, { passive: false });
         
         document.addEventListener('touchend', (event) => {
-            isRotating = false;
+            if (isRotating) {
+                const touchEndTime = Date.now();
+                const touchDuration = touchEndTime - touchStartTime;
+                const touch = event.changedTouches[0];
+                const deltaX = Math.abs(touch.clientX - touchStartX);
+                const deltaY = Math.abs(touch.clientY - touchStartY);
+                
+                console.log(`Touch end - Duration: ${touchDuration}ms, Movement: ${deltaX}, ${deltaY}`);
+                
+                // Check if this was a quick tap with minimal movement
+                if (touchDuration < 300 && deltaX < 15 && deltaY < 15) {
+                    console.log('Quick tap detected! Checking for painting...');
+                    this.checkPaintingTouch(touch.clientX, touch.clientY);
+                } else {
+                    console.log('Camera rotation or drag detected');
+                }
+                
+                isRotating = false;
+            }
             event.preventDefault();
         }, { passive: false });
         
         // Pinch-to-zoom
         this.setupPinchZoom();
         
-        console.log('Touch controls setup complete');
+        console.log('Unified touch controls setup complete');
     }
 
     setupPinchZoom() {
@@ -266,8 +310,8 @@ class MobileControls {
         
         joystickContainer.addEventListener('touchstart', (e) => {
             joystickActive = true;
-            e.stopPropagation();
-            e.preventDefault();
+            console.log('Joystick touch start');
+            // Don't prevent/stop - let unified touch system handle priorities
         });
         
         joystickContainer.addEventListener('touchmove', (e) => {
@@ -327,8 +371,7 @@ class MobileControls {
                 });
             }
             
-            e.stopPropagation();
-            e.preventDefault();
+            // Don't prevent/stop - let unified touch system handle priorities
         });
         
         joystickContainer.addEventListener('touchend', (e) => {
@@ -340,8 +383,7 @@ class MobileControls {
             joystick.style.background = 'rgba(255, 255, 255, 0.8)'; // Reset color
             this.moveLeft = this.moveRight = this.moveForward = this.moveBackward = false;
             console.log('Joystick reset to center');
-            e.stopPropagation();
-            e.preventDefault();
+            // Don't prevent/stop - let unified touch system handle priorities
         });
         
         return joystickContainer;
@@ -416,81 +458,11 @@ class MobileControls {
             // Check distance to active painting for auto-closing panels
             this.checkDistanceToActivePainting();
             
-            // Set up painting touch interaction once paintings are loaded
-            if (!this.paintingTouchSetup && this.gallery.paintings && this.gallery.paintings.length > 0) {
-                console.log('Paintings loaded, setting up touch interaction');
-                this.setupPaintingTouchInteraction();
-                this.paintingTouchSetup = true;
-            }
-            
             // Render the gallery
             this.gallery.animate();
         };
         animate();
         console.log('Mobile animation loop started');
-    }
-
-    setupPaintingTouchInteraction() {
-        console.log('Setting up direct painting touch interaction...');
-        
-        // Add touch event for direct painting interaction
-        document.addEventListener('touchstart', (event) => {
-            if (event.touches.length === 1) {
-                // Store touch start position for comparison
-                this.touchStartX = event.touches[0].clientX;
-                this.touchStartY = event.touches[0].clientY;
-                this.touchStartTime = Date.now();
-                console.log('Touch start recorded for painting interaction:', this.touchStartX, this.touchStartY);
-            }
-        });
-        
-        document.addEventListener('touchend', (event) => {
-            console.log('Touch end detected, checking for painting interaction...');
-            
-            if (!this.camera || !this.gallery) {
-                console.log('Camera or gallery not available');
-                return;
-            }
-            
-            // Check if touch is on UI elements (joystick, buttons)
-            const touch = event.changedTouches[0];
-            const touchedElement = document.elementFromPoint(touch.clientX, touch.clientY);
-            
-            if (touchedElement) {
-                const isUIElement = touchedElement.closest('#mobile-controls') || 
-                                  touchedElement.closest('#info-panel') || 
-                                  touchedElement.closest('#popup-painting-container');
-                
-                if (isUIElement) {
-                    console.log('Touch on UI element, ignoring for painting interaction');
-                    return;
-                }
-            }
-            
-            // Only process if it was a tap (not a drag or long press)
-            const touchEndTime = Date.now();
-            const touchDuration = touchEndTime - this.touchStartTime;
-            
-            console.log('Touch duration:', touchDuration);
-            if (touchDuration > 500) {
-                console.log('Touch too long, ignoring');
-                return; // Ignore long presses
-            }
-            
-            // Check if touch didn't move much (not a drag)
-            const deltaX = Math.abs(touch.clientX - this.touchStartX);
-            const deltaY = Math.abs(touch.clientY - this.touchStartY);
-            
-            console.log('Touch delta:', deltaX, deltaY);
-            if (deltaX > 20 || deltaY > 20) {
-                console.log('Touch moved too much, ignoring');
-                return; // Ignore drags
-            }
-            
-            console.log('Valid tap detected, checking for painting...');
-            // Check if we're touching a painting
-            this.checkPaintingTouch(touch.clientX, touch.clientY);
-        });
     }
 
     checkPaintingTouch(touchX, touchY) {
