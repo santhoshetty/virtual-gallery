@@ -15,8 +15,8 @@ const popupPaintingImageEl = document.getElementById('popup-painting-image');
 const paintingsData = [
     {
         id: 'painting1',
-        title: 'Sunrise Bliss',
-        description: 'An abstract representation of a vibrant sunrise over the mountains, evoking feelings of hope and new beginnings.',
+        title: 'Eternal Flame',
+        description: 'A portrait of Swami Vivekananda, standing resolute by the sea, draped in saffron robes. This piece captures his unwavering spirit and timeless message of strength, clarity, and awakening—a beacon for seekers across generations.',
         imageSrc: 'assets/paintings/painting1.jpeg',
         width: 3, // world units
         height: 4 // world units
