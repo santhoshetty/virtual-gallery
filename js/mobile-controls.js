@@ -416,11 +416,138 @@ class MobileControls {
             // Check distance to active painting for auto-closing panels
             this.checkDistanceToActivePainting();
             
+            // Set up painting touch interaction once paintings are loaded
+            if (!this.paintingTouchSetup && this.gallery.paintings && this.gallery.paintings.length > 0) {
+                console.log('Paintings loaded, setting up touch interaction');
+                this.setupPaintingTouchInteraction();
+                this.paintingTouchSetup = true;
+            }
+            
             // Render the gallery
             this.gallery.animate();
         };
         animate();
         console.log('Mobile animation loop started');
+    }
+
+    setupPaintingTouchInteraction() {
+        console.log('Setting up direct painting touch interaction...');
+        
+        // Add touch event for direct painting interaction
+        document.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 1) {
+                // Store touch start position for comparison
+                this.touchStartX = event.touches[0].clientX;
+                this.touchStartY = event.touches[0].clientY;
+                this.touchStartTime = Date.now();
+                console.log('Touch start recorded for painting interaction:', this.touchStartX, this.touchStartY);
+            }
+        });
+        
+        document.addEventListener('touchend', (event) => {
+            console.log('Touch end detected, checking for painting interaction...');
+            
+            if (!this.camera || !this.gallery) {
+                console.log('Camera or gallery not available');
+                return;
+            }
+            
+            // Check if touch is on UI elements (joystick, buttons)
+            const touch = event.changedTouches[0];
+            const touchedElement = document.elementFromPoint(touch.clientX, touch.clientY);
+            
+            if (touchedElement) {
+                const isUIElement = touchedElement.closest('#mobile-controls') || 
+                                  touchedElement.closest('#info-panel') || 
+                                  touchedElement.closest('#popup-painting-container');
+                
+                if (isUIElement) {
+                    console.log('Touch on UI element, ignoring for painting interaction');
+                    return;
+                }
+            }
+            
+            // Only process if it was a tap (not a drag or long press)
+            const touchEndTime = Date.now();
+            const touchDuration = touchEndTime - this.touchStartTime;
+            
+            console.log('Touch duration:', touchDuration);
+            if (touchDuration > 500) {
+                console.log('Touch too long, ignoring');
+                return; // Ignore long presses
+            }
+            
+            // Check if touch didn't move much (not a drag)
+            const deltaX = Math.abs(touch.clientX - this.touchStartX);
+            const deltaY = Math.abs(touch.clientY - this.touchStartY);
+            
+            console.log('Touch delta:', deltaX, deltaY);
+            if (deltaX > 20 || deltaY > 20) {
+                console.log('Touch moved too much, ignoring');
+                return; // Ignore drags
+            }
+            
+            console.log('Valid tap detected, checking for painting...');
+            // Check if we're touching a painting
+            this.checkPaintingTouch(touch.clientX, touch.clientY);
+        });
+    }
+
+    checkPaintingTouch(touchX, touchY) {
+        console.log('Checking painting touch at coordinates:', touchX, touchY);
+        
+        // Convert touch coordinates to normalized device coordinates
+        const rect = this.gallery.renderer.domElement.getBoundingClientRect();
+        const x = ((touchX - rect.left) / rect.width) * 2 - 1;
+        const y = -((touchY - rect.top) / rect.height) * 2 + 1;
+        
+        console.log('Normalized coordinates:', x, y);
+        console.log('Renderer rect:', rect);
+        console.log('Number of paintings:', this.gallery.paintings.length);
+        
+        // Raycast from the touch position
+        this.gallery.raycaster.setFromCamera({ x, y }, this.camera);
+        const intersects = this.gallery.raycaster.intersectObjects(this.gallery.paintings);
+        
+        console.log('Raycast intersects:', intersects.length);
+        
+        if (intersects.length > 0) {
+            const intersectedPainting = intersects[0].object;
+            const distance = intersects[0].distance;
+            
+            console.log(`Painting touched! Distance: ${distance.toFixed(2)}, Title: ${intersectedPainting.userData.title}`);
+            
+            if (distance < 15) { // Close enough to interact
+                this.openImagePopupDirectly(intersectedPainting);
+            } else {
+                this.showTemporaryMessage('Move closer to the painting to view it');
+            }
+        } else {
+            console.log('No painting found at touch position');
+        }
+    }
+
+    openImagePopupDirectly(painting) {
+        console.log('Opening image popup directly for painting:', painting.userData.title);
+        
+        const popupContainer = document.getElementById('popup-painting-container');
+        const popupImage = document.getElementById('popup-painting-image');
+        
+        // Track the active painting
+        this.activePainting = painting;
+        this.imagePopupOpen = true;
+        this.infoPanelOpen = false;
+        
+        // Set up the image
+        if (popupImage) popupImage.src = painting.userData.imageSrc;
+        
+        // Show the popup
+        if (popupContainer) {
+            popupContainer.style.display = 'block';
+        }
+        
+        // Set up close controls (only once)
+        this.setupCloseControls();
     }
 
     checkPaintingInteractionMobile() {
@@ -513,43 +640,8 @@ class MobileControls {
     }
 
     setupMobileInfoPanelControls() {
-        const closePanelBtn = document.getElementById('close-panel-btn');
-        const popupContainer = document.getElementById('popup-painting-container');
-        const popupImage = document.getElementById('popup-painting-image');
-        const popupCloseBtn = document.getElementById('popup-close-btn');
-        
-        const closeInfoAndPopup = () => {
-            const infoPanel = document.getElementById('info-panel');
-            if (infoPanel) infoPanel.style.display = 'none';
-            if (popupContainer) popupContainer.style.display = 'none';
-            
-            // Reset tracking variables
-            this.activePainting = null;
-            this.infoPanelOpen = false;
-            this.imagePopupOpen = false;
-        };
-        
-        // Close panel button
-        if (closePanelBtn) {
-            closePanelBtn.onclick = closeInfoAndPopup;
-        }
-        
-        // Close on image click (keep this for backward compatibility)
-        if (popupImage) {
-            popupImage.onclick = closeInfoAndPopup;
-        }
-        
-        // Close button (new X button)
-        if (popupCloseBtn) {
-            popupCloseBtn.onclick = closeInfoAndPopup;
-            
-            // Add touch event for mobile
-            popupCloseBtn.addEventListener('touchstart', (e) => {
-                closeInfoAndPopup();
-                e.preventDefault();
-                e.stopPropagation();
-            });
-        }
+        // Use the new simplified close controls
+        this.setupCloseControls();
     }
 
     // Check distance to active painting and auto-close panels if too far
@@ -564,21 +656,74 @@ class MobileControls {
         
         // Close panels if too far away
         if (distance > this.maxInfoDistance) {
-            console.log(`Moving away from painting (distance: ${distance.toFixed(2)}), closing info panels`);
-            
-            const infoPanel = document.getElementById('info-panel');
-            const popupContainer = document.getElementById('popup-painting-container');
-            
-            if (infoPanel) infoPanel.style.display = 'none';
-            if (popupContainer) popupContainer.style.display = 'none';
-            
-            // Reset tracking variables
-            this.activePainting = null;
-            this.infoPanelOpen = false;
-            this.imagePopupOpen = false;
-            
+            console.log(`Moving away from painting (distance: ${distance.toFixed(2)}), closing panels`);
+            this.closeAllPanels();
             this.showTemporaryMessage('Moved away from painting');
         }
+    }
+
+    setupCloseControls() {
+        // Prevent multiple setups
+        if (this.closeControlsSetup) return;
+        this.closeControlsSetup = true;
+        
+        console.log('Setting up close controls (one-time setup)');
+        
+        const closeFunction = () => {
+            console.log('Close function triggered');
+            this.closeAllPanels();
+        };
+        
+        // Set up all close methods
+        const closePanelBtn = document.getElementById('close-panel-btn');
+        const popupContainer = document.getElementById('popup-painting-container');
+        const popupImage = document.getElementById('popup-painting-image');
+        const popupCloseBtn = document.getElementById('popup-close-btn');
+        
+        if (closePanelBtn) {
+            closePanelBtn.addEventListener('click', closeFunction);
+            closePanelBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                closeFunction();
+            });
+        }
+        
+        if (popupCloseBtn) {
+            popupCloseBtn.addEventListener('click', closeFunction);
+            popupCloseBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closeFunction();
+            });
+        }
+        
+        if (popupImage) {
+            popupImage.addEventListener('click', closeFunction);
+        }
+        
+        console.log('Close controls setup complete');
+    }
+
+    closeAllPanels() {
+        console.log('Closing all panels');
+        
+        const infoPanel = document.getElementById('info-panel');
+        const popupContainer = document.getElementById('popup-painting-container');
+        
+        if (infoPanel) {
+            infoPanel.style.display = 'none';
+        }
+        
+        if (popupContainer) {
+            popupContainer.style.display = 'none';
+        }
+        
+        // Reset all tracking variables
+        this.activePainting = null;
+        this.infoPanelOpen = false;
+        this.imagePopupOpen = false;
+        
+        console.log('All panels closed');
     }
 }
 
