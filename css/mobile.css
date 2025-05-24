@@ -1,0 +1,314 @@
+/* Mobile-specific styles for Virtual Gallery */
+
+/* Reset and base mobile styles */
+@media (max-width: 768px) {
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    canvas {
+        display: block;
+        width: 100vw !important;
+        height: 100vh !important;
+    }
+}
+
+/* Mobile loading screen */
+.mobile-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: Arial, sans-serif;
+    z-index: 9998;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.mobile-loading h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.mobile-loading h2 {
+    margin-bottom: 20px;
+    font-weight: normal;
+}
+
+.mobile-loading p {
+    margin-bottom: 20px;
+    line-height: 1.6;
+    opacity: 0.9;
+    max-width: 400px;
+}
+
+.mobile-start-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.mobile-start-btn:hover,
+.mobile-start-btn:active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+/* Mobile controls */
+#mobile-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* Virtual joystick */
+.mobile-joystick {
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    position: relative;
+    pointer-events: all;
+    touch-action: none;
+}
+
+.mobile-joystick-knob {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: all 0.1s ease;
+}
+
+/* Mobile info button */
+.mobile-info-btn {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    pointer-events: all;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.mobile-info-btn:active {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(0.95);
+}
+
+/* Mobile device indicator */
+#mobile-indicator {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #e74c3c;
+    color: white;
+    padding: 8px 12px;
+    font-size: 12px;
+    border-radius: 4px;
+    z-index: 10000;
+    font-family: monospace;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Info panel mobile adjustments */
+@media (max-width: 768px) {
+    #info-panel {
+        position: fixed;
+        bottom: 160px;
+        left: 20px;
+        right: 20px;
+        top: auto;
+        max-height: 40vh;
+        overflow-y: auto;
+        border-radius: 15px;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    #painting-title {
+        font-size: 20px;
+        margin-bottom: 15px;
+        color: #fff;
+    }
+
+    #painting-description {
+        font-size: 14px;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    #close-panel-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    #close-panel-btn:active {
+        background: rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Popup image mobile adjustments */
+@media (max-width: 768px) {
+    #popup-painting-image {
+        max-width: 95% !important;
+        max-height: 85vh !important;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    }
+}
+
+/* Temporary message styles */
+#temp-message {
+    position: fixed;
+    bottom: 200px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 1001;
+    max-width: 80%;
+    text-align: center;
+    animation: fadeInOut 2s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}
+
+/* Hide desktop elements on mobile */
+@media (max-width: 768px) {
+    #blocker,
+    #instructions {
+        display: none !important;
+    }
+}
+
+/* Ensure no scrolling on mobile */
+@media (max-width: 768px) {
+    html, body {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+/* Mobile landscape adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+    .mobile-loading {
+        padding: 10px;
+    }
+    
+    .mobile-loading h1 {
+        font-size: 2em;
+        margin-bottom: 10px;
+    }
+    
+    .mobile-loading h2 {
+        margin-bottom: 10px;
+    }
+    
+    .mobile-loading p {
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+    
+    #mobile-controls {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+    }
+    
+    #info-panel {
+        bottom: 80px;
+        left: 10px;
+        right: 10px;
+        max-height: 30vh;
+    }
+}
+
+/* Landscape orientation specific styles */
+@media screen and (max-width: 768px) and (orientation: landscape) {
+    #info-panel {
+        bottom: 80px !important;
+        left: 20px !important;
+        right: 20px !important;
+        max-height: 60vh !important;
+        overflow-y: auto !important;
+    }
+    
+    #mobile-controls {
+        bottom: 10px !important;
+    }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+    /* iOS Safari viewport fix */
+    body {
+        height: -webkit-fill-available;
+    }
+    
+    canvas {
+        height: -webkit-fill-available !important;
+    }
+} 

@@ -23,40 +23,40 @@ const paintingsData = [
     },
     {
         id: 'painting2',
-        title: 'Ocean Dreams',
-        description: 'A textured piece capturing the turbulent yet serene nature of the deep ocean.',
+        title: 'Forest Whispers',
+        description: 'A romantic ode painted in earthy tones, this artwork captures an intimate moment beneath a tree’s quiet canopy. Infused with elegance and mystique, it evokes the timeless rhythm of love and nature entwined in harmony.',
         imageSrc: 'assets/paintings/painting2.jpeg',
         width: 4,
         height: 2.5
     },
     {
         id: 'painting3',
-        title: 'City Lights',
-        description: 'The vibrant energy of a city at night, depicted through bold strokes and colors.',
+        title: 'Silent Anchorage',
+        description: 'Bathed in dusky hues, this evocative seascape captures a lone boat moored at twilight. With its delicate interplay of light and shadow, the painting speaks of stillness, journeys paused, and the quiet poetry of waiting.',
         imageSrc: 'assets/paintings/painting3.jpeg',
         width: 4,
         height: 2.7
     },
     {
         id: 'painting4',
-        title: 'Forest Whisper',
-        description: 'A tranquil scene from a mystical forest, inviting contemplation.',
+        title: 'Guardians of the Frontier',
+        description: 'This bold and commanding piece captures three mounted warriors in mid-watch, eyes cast over a distant horizon. With detailed armor, proud steeds, and an air of unwavering vigilance, the painting pays tribute to the strength, unity, and enduring spirit of those who stand guard at the edges of history.',
         imageSrc: 'assets/paintings/painting4.jpeg',
         width: 4,
         height: 3.3
     },
     {
         id: 'painting5',
-        title: 'Silent Portrait',
-        description: 'A study in human emotion, captured in a moment of quiet reflection.',
+        title: 'Raga of the Flame',
+        description: 'Immersed in sacred rhythm, this evocative painting portrays a woman lost in the spiritual ecstasy of her music. Surrounded by the warm glow of oil lamps and adorned in traditional attire, she becomes one with the melody—an embodiment of devotion, passion, and inner fire.',
         imageSrc: 'assets/paintings/painting5.jpeg',
         width: 3,
         height: 4
     },
     {
         id: 'painting6',
-        title: 'Silent Portrait',
-        description: 'A study in human emotion, captured in a moment of quiet reflection.',
+        title: 'The Silent Buddha',
+        description: 'A tranquil depiction of the Buddha beneath a radiant full moon, this piece radiates peace and reflection. Surrounded by still waters and silent skies, it invites the viewer into a meditative moment—where nature, spirit, and silence become one.',
         imageSrc: 'assets/paintings/painting6.jpeg',
         width: 3.4,
         height: 4
