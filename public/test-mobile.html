@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Mobile Controls Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow: hidden;
+        }
+        
+        #debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 2000;
+            max-width: 300px;
+        }
+        
+        #camera-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+    <div id="debug-info">
+        <h3>Mobile Controls Debug</h3>
+        <div id="movement-status">Movement: None</div>
+        <div id="joystick-status">Joystick: Inactive</div>
+        <div id="camera-status">Camera: Not loaded</div>
+        <div id="position-status">Position: Unknown</div>
+        <div id="distance-status">Distance to painting: N/A</div>
+        <div id="panel-status">Panels: Closed</div>
+    </div>
+    
+    <div id="camera-info">
+        <h3>Camera Position</h3>
+        <div id="pos-x">X: 0</div>
+        <div id="pos-y">Y: 0</div>
+        <div id="pos-z">Z: 0</div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/three.min.js"></script>
+    <script src="js/PointerLockControls.js"></script>
+    <script src="js/mobile-detection.js"></script>
+    <script src="js/core-gallery.js"></script>
+    <script src="js/mobile-controls.js"></script>
+
+    <script>
+        // Force mobile detection
+        let gallery, mobileControls;
+        
+        // Override mobile detection for testing
+        window.MobileDetection = class {
+            constructor() {
+                this.isMobile = true;
+                this.isTouchDevice = true;
+            }
+            onResize() { return false; }
+        };
+        
+        function updateDebugInfo() {
+            const debugInfo = {
+                movement: mobileControls ? `F:${mobileControls.moveForward} B:${mobileControls.moveBackward} L:${mobileControls.moveLeft} R:${mobileControls.moveRight}` : 'No controls',
+                camera: mobileControls && mobileControls.camera ? 'Loaded' : 'Not loaded',
+                position: mobileControls && mobileControls.camera ? 
+                    `X:${mobileControls.camera.position.x.toFixed(2)} Y:${mobileControls.camera.position.y.toFixed(2)} Z:${mobileControls.camera.position.z.toFixed(2)}` : 
+                    'Unknown'
+            };
+            
+            document.getElementById('movement-status').textContent = `Movement: ${debugInfo.movement}`;
+            document.getElementById('camera-status').textContent = `Camera: ${debugInfo.camera}`;
+            document.getElementById('position-status').textContent = `Position: ${debugInfo.position}`;
+            
+            if (mobileControls && mobileControls.camera) {
+                document.getElementById('pos-x').textContent = `X: ${mobileControls.camera.position.x.toFixed(2)}`;
+                document.getElementById('pos-y').textContent = `Y: ${mobileControls.camera.position.y.toFixed(2)}`;
+                document.getElementById('pos-z').textContent = `Z: ${mobileControls.camera.position.z.toFixed(2)}`;
+                
+                // Distance and panel info
+                if (mobileControls.activePainting) {
+                    const distance = mobileControls.activePainting.position.distanceTo(mobileControls.camera.position);
+                    document.getElementById('distance-status').textContent = `Distance to painting: ${distance.toFixed(2)}`;
+                } else {
+                    document.getElementById('distance-status').textContent = 'Distance to painting: N/A';
+                }
+                
+                const panelStatus = mobileControls.infoPanelOpen ? 'Info Open' : 
+                                  mobileControls.imagePopupOpen ? 'Image Open' : 'Closed';
+                document.getElementById('panel-status').textContent = `Panels: ${panelStatus}`;
+            }
+        }
+        
+        // Initialize test
+        function initTest() {
+            console.log('Initializing mobile controls test...');
+            
+            gallery = new CoreGallery();
+            mobileControls = new MobileControls(null, gallery);
+            
+            // Update debug info regularly
+            setInterval(updateDebugInfo, 100);
+            
+            console.log('Test initialized. Check the debug panels for status.');
+        }
+        
+        // Auto-initialize when page loads
+        window.addEventListener('load', () => {
+            setTimeout(initTest, 500);
+        });
+        
+        // Log all console messages to see debugging output
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            
+            // Also show important logs in the debug panel
+            const logText = args.join(' ');
+            if (logText.includes('movement') || logText.includes('joystick') || logText.includes('camera')) {
+                const statusEl = document.getElementById('joystick-status');
+                if (statusEl) {
+                    statusEl.textContent = logText.substring(0, 50) + '...';
+                }
+            }
+        };
+    </script>
+</body>
+</html> 

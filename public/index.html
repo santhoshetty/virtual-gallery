@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Mom's Art Gallery - Virtual Experience</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playwrite+Magyarorsz%C3%A1g:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Loading indicator */
+        #loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 9999;
+            font-family: Arial, sans-serif;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading indicator -->
+    <div id="loading-indicator">
+        <div class="spinner"></div>
+        <p>Loading Virtual Gallery...</p>
+    </div>
+
+    <!-- Desktop UI elements -->
+    <div id="blocker">
+        <div id="instructions">
+            <span style="font-size:36px">🎨 Click to play</span>
+            <br />
+            <span style="font-size:18px">(W, A, S, D = Move, MOUSE = Look around)</span>
+            <br />
+            <span style="font-size:14px; opacity: 0.8;">ESC to unlock mouse • Scroll to zoom</span>
+        </div>
+    </div>
+
+    <!-- Info panel for paintings -->
+    <div id="info-panel" style="display: none;">
+        <h2 id="painting-title"></h2>
+        <p id="painting-description"></p>
+        <button id="close-panel-btn">Close</button>
+    </div>
+
+    <!-- Popup image for full-screen painting view -->
+    <img id="popup-painting-image" src="" alt="Painting" style="
+        display: none; 
+        position: fixed; 
+        top: 50%; 
+        left: 50%; 
+        transform: translate(-50%, -50%); 
+        max-width: 80%; 
+        max-height: 80vh; 
+        z-index: 1001; 
+        border: 5px solid white; 
+        box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        border-radius: 5px;
+        cursor: pointer;
+    "/>
+
+    <!-- Scripts - Load in order -->
+    <script src="js/three.min.js"></script>
+    <script src="js/PointerLockControls.js"></script>
+    
+    <!-- Modular architecture -->
+    <script src="js/mobile-detection.js"></script>
+    <script src="js/core-gallery.js"></script>
+    <script src="js/desktop-controls.js"></script>
+    <script src="js/mobile-controls.js"></script>
+    <script src="js/main-modular.js"></script>
+
+    <script>
+        // Hide loading indicator when everything is ready
+        window.addEventListener('load', function() {
+            // Wait a bit for modules to initialize
+            setTimeout(() => {
+                const loadingIndicator = document.getElementById('loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.style.opacity = '0';
+                    loadingIndicator.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        loadingIndicator.remove();
+                    }, 500);
+                }
+            }, 1000);
+        });
+
+        // Add debug info to console
+        setTimeout(() => {
+            if (window.virtualGallery) {
+                console.log('Virtual Gallery Debug Info:', window.virtualGallery.getDebugInfo());
+                console.log('Available commands:', {
+                    'virtualGallery.getDebugInfo()': 'Get current gallery state',
+                    'virtualGallery.toggleMobileMode()': 'Switch to mobile mode',
+                    'virtualGallery.toggleDesktopMode()': 'Switch to desktop mode'
+                });
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
