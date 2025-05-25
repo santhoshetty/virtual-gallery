@@ -515,7 +515,7 @@ class MobileControls {
         
         // Show the popup
         if (popupContainer) {
-            popupContainer.style.display = 'block';
+            popupContainer.style.display = 'flex';
         }
         
         // Set up close controls (only once)
@@ -560,7 +560,7 @@ class MobileControls {
         setTimeout(() => {
             if (infoPanel && infoPanel.style.display === 'block') {
                 if (popupContainer) {
-                    popupContainer.style.display = 'block';
+                    popupContainer.style.display = 'flex';
                     this.imagePopupOpen = true;
                 }
                 if (infoPanel) {
@@ -653,15 +653,24 @@ class MobileControls {
         const popupCloseBtn = document.getElementById('popup-close-btn');
         
         if (closePanelBtn) {
-            closePanelBtn.addEventListener('click', closeFunction);
+            closePanelBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                closeFunction();
+            });
             closePanelBtn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 closeFunction();
             });
         }
         
         if (popupCloseBtn) {
-            popupCloseBtn.addEventListener('click', closeFunction);
+            popupCloseBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                closeFunction();
+            });
             popupCloseBtn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -669,9 +678,8 @@ class MobileControls {
             });
         }
         
-        if (popupImage) {
-            popupImage.addEventListener('click', closeFunction);
-        }
+        // Remove click handler from popup image to prevent accidental closing
+        // The X button should be the primary way to close on mobile
         
         console.log('Close controls setup complete');
     }

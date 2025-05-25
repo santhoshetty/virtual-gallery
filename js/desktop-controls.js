@@ -49,14 +49,20 @@ class DesktopControls {
             
             // Hide info panel when controls are locked
             const infoPanel = document.getElementById('info-panel');
-            const popupImage = document.getElementById('popup-painting-image');
+            const popupContainer = document.getElementById('popup-painting-container');
             if (infoPanel) infoPanel.style.display = 'none';
-            if (popupImage) popupImage.style.display = 'none';
+            if (popupContainer) popupContainer.style.display = 'none';
         });
 
         this.controls.addEventListener('unlock', () => {
-            if (blocker) blocker.style.display = 'block';
-            if (instructions) instructions.style.display = '';
+            // Only show blocker if popup is not open
+            const popupContainer = document.getElementById('popup-painting-container');
+            const isPopupOpen = popupContainer && popupContainer.style.display === 'flex';
+            
+            if (!isPopupOpen) {
+                if (blocker) blocker.style.display = 'block';
+                if (instructions) instructions.style.display = '';
+            }
         });
 
         console.log('Desktop UI setup complete');
@@ -174,6 +180,7 @@ class DesktopControls {
         const infoPanel = document.getElementById('info-panel');
         const titleEl = document.getElementById('painting-title');
         const descriptionEl = document.getElementById('painting-description');
+        const popupContainer = document.getElementById('popup-painting-container');
         const popupImage = document.getElementById('popup-painting-image');
         
         if (titleEl) titleEl.textContent = painting.userData.title;
@@ -181,77 +188,114 @@ class DesktopControls {
         if (popupImage) popupImage.src = painting.userData.imageSrc;
         if (infoPanel) infoPanel.style.display = 'block';
         
-        // Setup click listener for popup
-        if (!document.body._popupClickListener) {
-            document.body._popupClickListener = (event) => {
-                if (infoPanel && infoPanel.style.display === 'block' && !infoPanel.contains(event.target)) {
-                    if (this.controls.isLocked) {
-                        if (popupImage) popupImage.style.display = 'block';
-                        this.controls.unlock();
-                        document.body.removeEventListener('click', document.body._popupClickListener);
-                        document.body._popupClickListener = null;
-                    }
-                }
-            };
-            document.body.addEventListener('click', document.body._popupClickListener);
+        // Remove any existing popup click listeners to avoid conflicts
+        if (document.body._popupClickListener) {
+            document.body.removeEventListener('click', document.body._popupClickListener);
+            document.body._popupClickListener = null;
         }
     }
 
     hideInfoPanelIfSafe() {
         const infoPanel = document.getElementById('info-panel');
-        const popupImage = document.getElementById('popup-painting-image');
+        const popupContainer = document.getElementById('popup-painting-container');
         
-        if (!popupImage || popupImage.style.display === 'none') {
+        if (!popupContainer || (popupContainer.style.display !== 'flex' && popupContainer.style.display !== 'block')) {
             if (infoPanel) infoPanel.style.display = 'none';
-            
-            if (document.body._popupClickListener) {
-                document.body.removeEventListener('click', document.body._popupClickListener);
-                document.body._popupClickListener = null;
-            }
         }
     }
 
     setupPaintingClick() {
         window.addEventListener('click', (event) => {
-            if (this.controls && this.controls.isLocked && window._centeredPainting) {
-                const popupImage = document.getElementById('popup-painting-image');
-                const infoPanel = document.getElementById('info-panel');
-                
-                if (popupImage) {
-                    popupImage.src = window._centeredPainting.userData.imageSrc;
-                    popupImage.style.display = 'block';
+            // Prevent conflicts with other UI elements
+            if (event.target.closest('#info-panel')) {
+                return;
+            }
+            
+            const popupContainer = document.getElementById('popup-painting-container');
+            const popupImage = document.getElementById('popup-painting-image');
+            const infoPanel = document.getElementById('info-panel');
+            
+            // If popup is open, clicking outside should close it
+            if (popupContainer && popupContainer.style.display === 'flex') {
+                // Check if click is on the background overlay (not on the image)
+                if (event.target === popupContainer || !event.target.closest('img')) {
+                    this.closePopup();
+                    return;
                 }
-                if (infoPanel) infoPanel.style.display = 'none';
-                this.controls.unlock();
+            }
+            
+            // If near a painting and controls are locked, open popup
+            if (this.controls && this.controls.isLocked && window._centeredPainting) {
+                this.openPaintingPopup(window._centeredPainting);
             }
         });
     }
 
+    openPaintingPopup(painting) {
+        const popupContainer = document.getElementById('popup-painting-container');
+        const popupImage = document.getElementById('popup-painting-image');
+        const popupCloseBtn = document.getElementById('popup-close-btn');
+        const infoPanel = document.getElementById('info-panel');
+        
+        if (popupImage) {
+            popupImage.src = painting.userData.imageSrc;
+        }
+        if (popupContainer) {
+            popupContainer.style.display = 'flex';
+        }
+        if (infoPanel) {
+            infoPanel.style.display = 'none';
+        }
+        
+        // Hide X button for desktop
+        if (popupCloseBtn) {
+            popupCloseBtn.style.display = 'none';
+        }
+        
+        this.controls.unlock();
+    }
+
+    closePopup() {
+        const popupContainer = document.getElementById('popup-painting-container');
+        const popupCloseBtn = document.getElementById('popup-close-btn');
+        const infoPanel = document.getElementById('info-panel');
+        const blocker = document.getElementById('blocker');
+        const instructions = document.getElementById('instructions');
+        
+        if (popupContainer) {
+            popupContainer.style.display = 'none';
+        }
+        if (infoPanel) {
+            infoPanel.style.display = 'none';
+        }
+        
+        // Restore X button display for mobile (in case device switches)
+        if (popupCloseBtn) {
+            popupCloseBtn.style.display = '';
+        }
+        
+        // Show the blocker/instructions again since popup is closed
+        if (!this.controls.isLocked) {
+            if (blocker) blocker.style.display = 'block';
+            if (instructions) instructions.style.display = '';
+        }
+        
+        if (this.controls && !this.controls.isLocked) {
+            this.controls.lock();
+        }
+    }
+
     setupInfoPanelControls() {
         const closePanelBtn = document.getElementById('close-panel-btn');
-        const popupImage = document.getElementById('popup-painting-image');
-        
-        const closeInfoAndPopup = () => {
-            const infoPanel = document.getElementById('info-panel');
-            if (infoPanel) infoPanel.style.display = 'none';
-            if (popupImage) popupImage.style.display = 'none';
-            
-            if (this.controls && !this.controls.isLocked) {
-                this.controls.lock();
-            }
-            
-            if (document.body._popupClickListener) {
-                document.body.removeEventListener('click', document.body._popupClickListener);
-                document.body._popupClickListener = null;
-            }
-        };
         
         if (closePanelBtn) {
-            closePanelBtn.addEventListener('click', closeInfoAndPopup);
+            closePanelBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                this.closePopup();
+            });
         }
-        if (popupImage) {
-            popupImage.addEventListener('click', closeInfoAndPopup);
-        }
+        
+        // Note: No X button setup for desktop - it's hidden
     }
 }
 
